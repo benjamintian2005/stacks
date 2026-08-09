@@ -16,4 +16,4 @@ This project is a personal media portfolio built using React.js and hosted on AW
 
 
 ## Project Demo
-Check out the live website here: [Live Demo]([your-website-link](https://main.d1pg21dn3jhrgj.amplifyapp.com/))
+Check out the live website here: [Live Demo](https://main.d1pg21dn3jhrgj.amplifyapp.com/)
