@@ -56,12 +56,15 @@ All six phases of the original build-out are implemented:
   (HTML-scraped — experimental, ported from the `MediaParser` reference project and will break if those
   sites change their markup) profile URL. Nothing is added automatically — `/import/[jobId]` is a manual
   match-and-confirm review step. See `lib/import/`.
+- **Profile browsing**: `/u/[username]` links out to a full diary timeline (`/diary`), lists (`/lists`), and
+  per-category library grids (`/library/[mediaTypeSlug]`). `/settings` edits displayName/bio.
+- **Comments** on diary entries, alongside likes.
+- `loading.tsx` skeletons on the data-heavy routes (feed, media detail, lists, profile, library, diary) so
+  navigation doesn't show a blank page while Prisma queries resolve.
 
 Known gaps, by design (not oversights):
 - No logged-out browsing — every route except `/sign-in`, `/sign-up`, and `/welcome` requires a session.
-- A user's full per-category library/diary browsing views and `/settings` aren't built yet.
 - No avatar/banner upload UI (would use Vercel Blob).
-- No comments on diary entries (likes only) — the `Comment` model exists in the schema for a future pass.
 - Clerk is still running in development mode (test API keys) — a production Clerk instance needs a
   verified custom domain.
 
