@@ -17,7 +17,7 @@ export async function searchMedia(mediaType: MediaType, query: string): Promise<
     case 'TV':
       return searchTmdb(process.env.TMDB_API_KEY ?? '', mediaType, query);
     case 'BOOK':
-      return searchGoogleBooks(undefined, query);
+      return searchGoogleBooks(process.env.GOOGLE_BOOKS_API_KEY, query);
     case 'ALBUM':
       return searchMusicBrainz(query);
     case 'ANIME':

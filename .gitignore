@@ -31,17 +31,14 @@ next-env.d.ts
 .vercel
 
 # Env
-.env
-.env*.local
+.env*
+!.env.example
 
 # Prisma
 lib/generated
 
 # Testing
 coverage
-
-.vercel
-.env*
 
 # TypeScript build cache
 tsconfig.tsbuildinfo
