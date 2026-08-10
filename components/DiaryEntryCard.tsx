@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import StarRating from './StarRating';
 import LikeButton from './LikeButton';
+import CommentForm from './CommentForm';
 
 type DiaryEntryCardData = {
   id: string;
@@ -13,6 +14,8 @@ type DiaryEntryCardData = {
   user: { username: string };
   _count: { likes: number };
   likes: { userId: string }[];
+  comments?: { id: string; text: string; user: { username: string } }[];
+  mediaItem?: { title: string };
 };
 
 export default function DiaryEntryCard({ entry }: { entry: DiaryEntryCardData }) {
@@ -34,6 +37,14 @@ export default function DiaryEntryCard({ entry }: { entry: DiaryEntryCardData })
           </span>
         )}
       </div>
+      {entry.mediaItem && (
+        <Link
+          href={`/media/${entry.mediaItemId}`}
+          className="mt-1 block text-sm font-medium text-slate-900 hover:text-indigo-600 dark:text-white"
+        >
+          {entry.mediaItem.title}
+        </Link>
+      )}
       {entry.rating != null && (
         <div className="mt-1">
           <StarRating value={entry.rating} onChange={() => {}} disabled />
@@ -51,6 +62,20 @@ export default function DiaryEntryCard({ entry }: { entry: DiaryEntryCardData })
         initialCount={entry._count.likes}
         initialLiked={entry.likes.length > 0}
       />
+
+      {entry.comments && (
+        <div className="mt-2 space-y-1 border-t border-slate-100 pt-2 dark:border-slate-800">
+          {entry.comments.map((comment) => (
+            <p key={comment.id} className="text-xs text-slate-600 dark:text-slate-400">
+              <Link href={`/u/${comment.user.username}`} className="font-medium text-slate-900 dark:text-white">
+                @{comment.user.username}
+              </Link>{' '}
+              {comment.text}
+            </p>
+          ))}
+          <CommentForm diaryEntryId={entry.id} mediaItemId={entry.mediaItemId} />
+        </div>
+      )}
     </div>
   );
 }

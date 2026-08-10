@@ -19,6 +19,7 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ me
         user: true,
         _count: { select: { likes: true } },
         likes: { where: { userId }, select: { userId: true } },
+        comments: { include: { user: true }, orderBy: { createdAt: 'asc' } },
       },
       orderBy: { loggedDate: 'desc' },
     }),

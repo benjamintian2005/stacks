@@ -40,3 +40,29 @@ export async function createProfile(input: CreateProfileInput): Promise<CreatePr
 
   redirect('/');
 }
+
+const updateProfileSchema = z.object({
+  displayName: z.string().max(50).optional(),
+  bio: z.string().max(300).optional(),
+});
+
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+export async function updateProfile(input: UpdateProfileInput): Promise<CreateProfileResult> {
+  const userId = await requireUserId();
+  const parsed = updateProfileSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
+  }
+
+  await getDb().profile.update({
+    where: { id: userId },
+    data: {
+      displayName: parsed.data.displayName || null,
+      bio: parsed.data.bio || null,
+    },
+  });
+
+  return {};
+}
