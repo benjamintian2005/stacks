@@ -8,8 +8,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
-dist-ssr
 *.local
 
 # Editor directories and files
@@ -23,7 +21,32 @@ dist-ssr
 *.sln
 *.sw?
 
-# amplify
-.amplify
-amplify_outputs*
-amplifyconfiguration*
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
+
+# Vercel
+.vercel
+
+# Env
+.env
+.env*.local
+
+# Prisma
+lib/generated
+
+# Testing
+coverage
+
+.vercel
+.env*
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
+
+# Auto-downloaded agent skill helpers (from `vercel integration add`)
+.agents/skills
+.claude/skills
+skills-lock.json
