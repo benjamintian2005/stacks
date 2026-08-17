@@ -20,7 +20,7 @@ export default function MediaCard({
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
         <div className="relative aspect-[2/3] w-full bg-slate-100 dark:bg-slate-800">
           {media.coverImageUrl ? (
-            <Image src={media.coverImageUrl} alt={media.title} fill sizes="200px" className="object-cover" unoptimized />
+            <Image src={media.coverImageUrl} alt={media.title} fill sizes="200px" className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center px-2 text-center text-xs text-slate-400">
               No cover

@@ -21,6 +21,7 @@ export default async function UserDiaryPage({ params }: { params: Promise<{ user
       likes: { where: { userId }, select: { userId: true } },
     },
     orderBy: { loggedDate: 'desc' },
+    take: 50,
   });
 
   return (

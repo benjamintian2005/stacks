@@ -24,6 +24,7 @@ export default async function UserLibraryPage({
     where: { userId: profile.id, mediaItem: { mediaType } },
     include: { mediaItem: true },
     orderBy: { updatedAt: 'desc' },
+    take: 60,
   });
 
   return (
@@ -46,7 +47,6 @@ export default async function UserLibraryPage({
                     fill
                     sizes="200px"
                     className="object-cover"
-                    unoptimized
                   />
                 )}
               </div>

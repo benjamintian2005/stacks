@@ -32,7 +32,7 @@ export const parseLetterboxdRss = (xml: string): ScrapedItem[] => {
 
 export const parseLetterboxd = async (sourceUrl: string): Promise<ScrapedItem[]> => {
   const username = extractLetterboxdUsername(sourceUrl);
-  const response = await fetch(`https://letterboxd.com/${username}/rss/`);
+  const response = await fetch(`https://letterboxd.com/${username}/rss/`, { signal: AbortSignal.timeout(15_000) });
   if (!response.ok) {
     throw new Error(`Letterboxd RSS fetch failed with status ${response.status}`);
   }

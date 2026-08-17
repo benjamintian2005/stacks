@@ -15,6 +15,7 @@ export default async function UserListsPage({ params }: { params: Promise<{ user
   const lists = await getDb().mediaList.findMany({
     where: { creatorId: profile.id },
     orderBy: { createdAt: 'desc' },
+    take: 50,
   });
   const isOwnProfile = profile.id === userId;
 

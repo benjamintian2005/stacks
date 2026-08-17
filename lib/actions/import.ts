@@ -1,5 +1,6 @@
 'use server';
 
+import { after } from 'next/server';
 import { requireUserId } from '@/lib/auth';
 import { getDb } from '@/lib/db';
 import { runImport, type ImportPlatform } from '@/lib/import';
@@ -11,18 +12,22 @@ export async function startImport(sourcePlatform: ImportPlatform, sourceUrl: str
     data: { userId, sourcePlatform, sourceUrl, status: 'RUNNING' },
   });
 
-  try {
-    const items = await runImport(sourcePlatform, sourceUrl);
-    await getDb().importJob.update({
-      where: { id: job.id },
-      data: { status: 'COMPLETED', rawResultsJson: items },
-    });
-  } catch (err) {
-    await getDb().importJob.update({
-      where: { id: job.id },
-      data: { status: 'FAILED', errorMessage: err instanceof Error ? err.message : 'Import failed' },
-    });
-  }
+  // Scraping runs after the response is sent instead of blocking this action — a Goodreads/RYM
+  // profile scrape can take well past what feels responsive for a form submit.
+  after(async () => {
+    try {
+      const items = await runImport(sourcePlatform, sourceUrl);
+      await getDb().importJob.update({
+        where: { id: job.id },
+        data: { status: 'COMPLETED', rawResultsJson: items },
+      });
+    } catch (err) {
+      await getDb().importJob.update({
+        where: { id: job.id },
+        data: { status: 'FAILED', errorMessage: err instanceof Error ? err.message : 'Import failed' },
+      });
+    }
+  });
 
   return job.id;
 }

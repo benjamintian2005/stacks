@@ -55,7 +55,7 @@ describe('parseLetterboxd', () => {
 
     const items = await parseLetterboxd('https://letterboxd.com/someuser/');
 
-    expect(fetch).toHaveBeenCalledWith('https://letterboxd.com/someuser/rss/');
+    expect(fetch).toHaveBeenCalledWith('https://letterboxd.com/someuser/rss/', expect.objectContaining({ signal: expect.any(AbortSignal) }));
     expect(items).toHaveLength(2);
   });
 

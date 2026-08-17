@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getDb } from '@/lib/db';
 import { requireUserId } from '@/lib/auth';
 import ImportMatchRow from '@/components/ImportMatchRow';
+import ImportStatusPoller from '@/components/ImportStatusPoller';
 import type { ScrapedItem } from '@/lib/import';
 import type { MediaType } from '@/lib/types';
 
@@ -21,7 +22,12 @@ export default async function ImportReviewPage({ params }: { params: Promise<{ j
   }
 
   if (job.status === 'RUNNING' || job.status === 'PENDING') {
-    return <div className="px-4 py-16 text-center text-slate-500 dark:text-slate-400">Importing…</div>;
+    return (
+      <div className="px-4 py-16 text-center text-slate-500 dark:text-slate-400">
+        Importing…
+        <ImportStatusPoller />
+      </div>
+    );
   }
 
   if (job.status === 'FAILED') {

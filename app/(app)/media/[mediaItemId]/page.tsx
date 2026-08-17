@@ -22,6 +22,7 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ me
         comments: { include: { user: true }, orderBy: { createdAt: 'asc' } },
       },
       orderBy: { loggedDate: 'desc' },
+      take: 50,
     }),
   ]);
 
@@ -34,7 +35,7 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ me
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="relative h-72 w-48 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
           {media.coverImageUrl ? (
-            <Image src={media.coverImageUrl} alt={media.title} fill sizes="200px" className="object-cover" unoptimized />
+            <Image src={media.coverImageUrl} alt={media.title} fill sizes="200px" className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-xs text-slate-400">No cover</div>
           )}

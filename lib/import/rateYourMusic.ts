@@ -43,6 +43,7 @@ export const parseRateYourMusic = async (sourceUrl: string): Promise<ScrapedItem
   for (let page = 1; page <= MAX_PAGES; page += 1) {
     const response = await fetch(`https://rateyourmusic.com/collection/${username}/r/${page}/`, {
       headers: { 'User-Agent': IMPORT_USER_AGENT },
+      signal: AbortSignal.timeout(15_000),
     });
     if (!response.ok) break;
 

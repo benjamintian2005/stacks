@@ -35,7 +35,10 @@ export const parseGoodreadsHtml = (html: string): ScrapedItem[] => {
 
 export const parseGoodreads = async (sourceUrl: string): Promise<ScrapedItem[]> => {
   const url = buildGoodreadsUrl(sourceUrl);
-  const response = await fetch(url, { headers: { 'User-Agent': IMPORT_USER_AGENT } });
+  const response = await fetch(url, {
+    headers: { 'User-Agent': IMPORT_USER_AGENT },
+    signal: AbortSignal.timeout(15_000),
+  });
   if (!response.ok) {
     throw new Error(`Goodreads fetch failed with status ${response.status}`);
   }
