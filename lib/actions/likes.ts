@@ -4,18 +4,19 @@ import { revalidatePath } from 'next/cache';
 import { requireUserId } from '@/lib/auth';
 import { getDb } from '@/lib/db';
 
-export async function toggleLike(diaryEntryId: string, mediaItemId: string) {
+export async function toggleLike(experienceId: string) {
   const userId = await requireUserId();
 
   const existing = await getDb().like.findUnique({
-    where: { userId_diaryEntryId: { userId, diaryEntryId } },
+    where: { userId_experienceId: { userId, experienceId } },
   });
 
   if (existing) {
-    await getDb().like.delete({ where: { userId_diaryEntryId: { userId, diaryEntryId } } });
+    await getDb().like.delete({ where: { userId_experienceId: { userId, experienceId } } });
   } else {
-    await getDb().like.create({ data: { userId, diaryEntryId } });
+    await getDb().like.create({ data: { userId, experienceId } });
   }
 
-  revalidatePath(`/media/${mediaItemId}`);
+  revalidatePath(`/experience/${experienceId}`);
+  revalidatePath('/feed');
 }

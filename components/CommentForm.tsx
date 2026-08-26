@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { addComment } from '@/lib/actions/comments';
 
-export default function CommentForm({ diaryEntryId, mediaItemId }: { diaryEntryId: string; mediaItemId: string }) {
+export default function CommentForm({ experienceId }: { experienceId: string }) {
   const [text, setText] = useState('');
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function CommentForm({ diaryEntryId, mediaItemId }: { diaryEntryI
   const submit = () => {
     if (!text.trim()) return;
     startTransition(async () => {
-      await addComment({ diaryEntryId, mediaItemId, text });
+      await addComment({ experienceId, text });
       setText('');
       router.refresh();
     });

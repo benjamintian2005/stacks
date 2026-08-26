@@ -5,13 +5,11 @@ import { Heart } from 'lucide-react';
 import { toggleLike } from '@/lib/actions/likes';
 
 export default function LikeButton({
-  diaryEntryId,
-  mediaItemId,
+  experienceId,
   initialCount,
   initialLiked,
 }: {
-  diaryEntryId: string;
-  mediaItemId: string;
+  experienceId: string;
   initialCount: number;
   initialLiked: boolean;
 }) {
@@ -23,7 +21,7 @@ export default function LikeButton({
     setLiked(!liked);
     setCount((c) => (liked ? c - 1 : c + 1));
     startTransition(async () => {
-      await toggleLike(diaryEntryId, mediaItemId);
+      await toggleLike(experienceId);
     });
   };
 

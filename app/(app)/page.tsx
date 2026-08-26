@@ -1,31 +1,53 @@
 import Link from 'next/link';
-import { getCurrentProfile } from '@/lib/auth';
-import { ALL_MEDIA_TYPES, MEDIA_TYPE_LABELS, MEDIA_TYPE_SLUGS } from '@/lib/types';
+import { Plus } from 'lucide-react';
+import { requireUserId, getCurrentProfile } from '@/lib/auth';
+import { getDb } from '@/lib/db';
+import ExperienceCard from '@/components/ExperienceCard';
 
 export default async function HomePage() {
+  const userId = await requireUserId();
   const profile = await getCurrentProfile();
 
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-        Welcome back{profile?.displayName ? `, ${profile.displayName}` : ''}
-      </h1>
-      <p className="mt-1 text-slate-500 dark:text-slate-400">
-        Search a catalog, log what you&apos;ve consumed, and keep track of ratings across everything.
-      </p>
+  const experiences = await getDb().experience.findMany({
+    where: { userId },
+    include: {
+      user: true,
+      photos: { orderBy: { position: 'asc' } },
+      likes: { where: { userId } },
+      _count: { select: { likes: true } },
+    },
+    orderBy: { experiencedAt: 'desc' },
+    take: 20,
+  });
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {ALL_MEDIA_TYPES.map((mediaType) => (
-          <Link
-            key={mediaType}
-            href={`/discover/${MEDIA_TYPE_SLUGS[mediaType]}`}
-            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-          >
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              Discover {MEDIA_TYPE_LABELS[mediaType]}
-            </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Search, rate, and add to your library.</p>
-          </Link>
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-8">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          Welcome back{profile?.displayName ? `, ${profile.displayName}` : ''}
+        </h1>
+        <Link
+          href="/log"
+          className="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700"
+        >
+          <Plus className="h-4 w-4" />
+          Log an experience
+        </Link>
+      </div>
+      <p className="mt-1 text-slate-500 dark:text-slate-400">Your recently logged experiences.</p>
+
+      <div className="mt-6 space-y-3">
+        {experiences.length === 0 && (
+          <p className="text-slate-500 dark:text-slate-400">
+            You haven&apos;t logged anything yet.{' '}
+            <Link href="/log" className="text-indigo-600 hover:underline">
+              Log your first experience
+            </Link>
+            .
+          </p>
+        )}
+        {experiences.map((experience) => (
+          <ExperienceCard key={experience.id} experience={experience} />
         ))}
       </div>
     </div>

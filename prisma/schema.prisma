@@ -7,53 +7,9 @@ datasource db {
   provider = "postgresql"
 }
 
-enum MediaType {
-  MOVIE
-  TV
-  BOOK
-  ALBUM
-  ANIME
-  MANGA
-  GAME
-}
-
-enum ExternalSource {
-  TMDB
-  GOOGLEBOOKS
-  MUSICBRAINZ
-  JIKAN
-  RAWG
-  MANUAL
-}
-
-enum LibraryStatus {
-  PLANNED
-  IN_PROGRESS
-  COMPLETED
-  DROPPED
-}
-
 enum ActivityEventType {
-  RATED
-  LOGGED_DIARY
-  STARTED
-  COMPLETED
-  CREATED_LIST
+  LOGGED_EXPERIENCE
   FOLLOWED_USER
-  FAVORITED
-}
-
-enum ImportSourcePlatform {
-  LETTERBOXD
-  GOODREADS
-  RATEYOURMUSIC
-}
-
-enum ImportJobStatus {
-  PENDING
-  RUNNING
-  COMPLETED
-  FAILED
 }
 
 /// Keyed by Clerk user id — no separate "account" model needed.
@@ -67,105 +23,40 @@ model Profile {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  libraryEntries LibraryEntry[]
-  diaryEntries   DiaryEntry[]
-  mediaLists     MediaList[]
+  experiences    Experience[]
   activityEvents ActivityEvent[] @relation("ActorEvents")
   likes          Like[]
   comments       Comment[]
-  importJobs     ImportJob[]
   following      Follow[]        @relation("Follower")
   followers      Follow[]        @relation("Following")
 }
 
-model MediaItem {
-  id              String         @id @default(cuid())
-  mediaType       MediaType
-  title           String
-  alternateTitles String[]
-  releaseYear     Int?
-  coverImageUrl   String?
-  description     String?
-  genres          String[]
-  creators        String[]
-  externalSource  ExternalSource
-  externalId      String
-  metadata        Json?
-  createdAt       DateTime       @default(now())
+/// A logged real-world experience: something the user did, with optional photos.
+model Experience {
+  id            String   @id @default(cuid())
+  userId        String
+  user          Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  location      String?
+  experiencedAt DateTime
+  createdAt     DateTime @default(now())
 
-  libraryEntries LibraryEntry[]
-  diaryEntries   DiaryEntry[]
-  listItems      MediaListItem[]
-
-  @@unique([externalSource, externalId])
-}
-
-model LibraryEntry {
-  id          String        @id @default(cuid())
-  userId      String
-  user        Profile       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mediaItemId String
-  mediaItem   MediaItem     @relation(fields: [mediaItemId], references: [id], onDelete: Cascade)
-  status      LibraryStatus
-  rating      Float?
-  isFavorite  Boolean       @default(false)
-  startedAt   DateTime?
-  completedAt DateTime?
-  progress    String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  @@unique([userId, mediaItemId])
-  @@index([mediaItemId])
-}
-
-/// Append-only log, separate from LibraryEntry so rewatches/rereads are representable.
-model DiaryEntry {
-  id               String    @id @default(cuid())
-  userId           String
-  user             Profile   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mediaItemId      String
-  mediaItem        MediaItem @relation(fields: [mediaItemId], references: [id], onDelete: Cascade)
-  libraryEntryId   String?
-  rating           Float?
-  reviewText       String?
-  loggedDate       DateTime
-  containsSpoilers Boolean   @default(false)
-  rewatch          Boolean   @default(false)
-  createdAt        DateTime  @default(now())
-
+  photos   ExperiencePhoto[]
   likes    Like[]
   comments Comment[]
 
-  @@index([mediaItemId])
-  @@index([userId])
+  @@index([userId, experiencedAt])
 }
 
-model MediaList {
-  id            String   @id @default(cuid())
-  creatorId     String
-  creator       Profile  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  title         String
-  description   String?
-  isRanked      Boolean  @default(false)
-  coverImageUrl String?
-  createdAt     DateTime @default(now())
+model ExperiencePhoto {
+  id           String     @id @default(cuid())
+  experienceId String
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  url          String
+  position     Int        @default(0)
 
-  items MediaListItem[]
-
-  @@index([creatorId])
-}
-
-model MediaListItem {
-  id          String    @id @default(cuid())
-  mediaListId String
-  mediaList   MediaList @relation(fields: [mediaListId], references: [id], onDelete: Cascade)
-  mediaItemId String
-  mediaItem   MediaItem @relation(fields: [mediaItemId], references: [id], onDelete: Cascade)
-  position    Int
-  note        String?
-
-  @@index([mediaListId])
+  @@index([experienceId])
 }
 
 model Follow {
@@ -184,9 +75,7 @@ model ActivityEvent {
   actorId      String
   actor        Profile           @relation("ActorEvents", fields: [actorId], references: [id], onDelete: Cascade)
   eventType    ActivityEventType
-  mediaItemId  String?
-  diaryEntryId String?
-  mediaListId  String?
+  experienceId String?
   targetUserId String?
   createdAt    DateTime          @default(now())
 
@@ -196,35 +85,21 @@ model ActivityEvent {
 model Like {
   userId       String
   user         Profile    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  diaryEntryId String
-  diaryEntry   DiaryEntry @relation(fields: [diaryEntryId], references: [id], onDelete: Cascade)
+  experienceId String
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
   createdAt    DateTime   @default(now())
 
-  @@id([userId, diaryEntryId])
+  @@id([userId, experienceId])
 }
 
 model Comment {
   id           String     @id @default(cuid())
   userId       String
   user         Profile    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  diaryEntryId String
-  diaryEntry   DiaryEntry @relation(fields: [diaryEntryId], references: [id], onDelete: Cascade)
+  experienceId String
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
   text         String
   createdAt    DateTime   @default(now())
 
-  @@index([diaryEntryId])
-}
-
-model ImportJob {
-  id             String               @id @default(cuid())
-  userId         String
-  user           Profile              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sourcePlatform ImportSourcePlatform
-  sourceUrl      String
-  status         ImportJobStatus
-  rawResultsJson Json?
-  errorMessage   String?
-  createdAt      DateTime             @default(now())
-
-  @@index([userId])
+  @@index([experienceId])
 }
